@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
-@Dat
+@Data
 @Entity
 public class User {
 
