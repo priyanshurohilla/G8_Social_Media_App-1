@@ -1,79 +1,49 @@
 package app.socialmedia.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import lombok.Data;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
+
+@Dat
 @Entity
 public class User {
 
-    @Id
-    private int userId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private int userId;
 
-    private String fullName;
+  @NotBlank
+  @Size(min = 3, max = 20)
+  private String fullName;
 
-    private String userName;
+  @NotBlank
+  @Size(min = 3, max = 15)
+  private String userName;
 
-    private String email;
+  @NotBlank
+  @Size(max = 40)
+  @Email
+  private String email;
 
-    private String profilePicUrl;
+  private String profilePicUrl;
 
-    private String phoneNumber;
+  @Size(min = 0, max = 10)
+  private String phoneNumber;
 
-    private String password;
+  @NotBlank
+  @Size(min = 6, max = 20)
+  private String password;
 
-    public int getUserId() {
-        return userId;
-    }
+  List<String> following = new ArrayList<>();
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
+  List<String> follower = new ArrayList<>();
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getProfilePicUrl() {
-        return profilePicUrl;
-    }
-
-    public void setProfilePicUrl(String profilePicUrl) {
-        this.profilePicUrl = profilePicUrl;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
