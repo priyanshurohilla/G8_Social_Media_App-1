@@ -2,6 +2,7 @@ package app.socialmedia.controller;
 
 import app.socialmedia.model.Post;
 import app.socialmedia.model.Response;
+import app.socialmedia.service.AuthService;
 import app.socialmedia.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,14 @@ public class PostController {
     @Autowired
     PostService postService;
 
+    @Autowired
+    AuthService authService;
+
     @PostMapping(value = "/createpost", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Response> create(@RequestBody Post post){
 
         Response response;
+
         if(post.getContent().equals("") && post.getImageUrl().equals("")){
             response = new Response();
             response.setStatus(false);
@@ -32,6 +37,19 @@ public class PostController {
         if(response.isStatus()){
             return new ResponseEntity<Response>(response, HttpStatus.OK);
         } else {
+            return new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    @PostMapping(value = "/editpost",consumes = "application/json", produces = "application/json")
+    public  ResponseEntity<Response> edit(@RequestBody Post post){
+
+        Response response = postService.editPost(post);
+
+        if(response.isStatus()){
+            return new ResponseEntity<Response>(response, HttpStatus.OK);
+        }else {
             return new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
