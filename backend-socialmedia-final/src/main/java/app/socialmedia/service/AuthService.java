@@ -1,6 +1,7 @@
 package app.socialmedia.service;
 
 
+import app.socialmedia.Exception.UserNotFoundException;
 import app.socialmedia.model.LoginRequest;
 import app.socialmedia.model.Response;
 import app.socialmedia.model.User;
@@ -18,6 +19,8 @@ public class AuthService {
 
   @Value("${pepper}")
   String pepper;
+
+  User loggedInUser;
 
   public Response signupUser(User user) {
     User newUser = userRepository.findByEmail(user.getEmail());
@@ -53,6 +56,7 @@ public class AuthService {
       String salt = user.getSalt();
       String hashedPwd = BCrypt.hashpw(loginRequest.getPassword(), salt + pepper);
       if (hashedPwd.equals(user.getPassword())) {
+        loggedInUser = user;
         loginResponse.setStatus(true);
         loginResponse.setMessage("Login successful for user : " + user.getUserName());
 
@@ -62,5 +66,23 @@ public class AuthService {
       }
     }
     return loginResponse;
+  }
+  public Response logoutUser(int userId){
+    Response logoutResponse = new Response();
+    if(loggedInUser==null){
+      String exceptionMessage = "User with userId " + userId + " is not logged in.";
+      throw new UserNotFoundException(exceptionMessage);
+    }
+    else if (loggedInUser.getUserId()==userId) {
+
+      loggedInUser = null;
+      logoutResponse.setStatus(true);
+      logoutResponse.setMessage("Logout successful");
+
+    } else {
+      logoutResponse.setStatus(false);
+      logoutResponse.setMessage("You are trying to access someone's else account which is not allowed");
+    }
+    return logoutResponse;
   }
 }
