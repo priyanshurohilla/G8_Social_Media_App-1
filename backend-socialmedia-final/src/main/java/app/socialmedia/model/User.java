@@ -43,8 +43,8 @@ public class User {
 
   private String salt;
 
- private List<String> following = new ArrayList<>();
+ private List<Integer> following = new ArrayList<>();
 
-  private List<String> follower = new ArrayList<>();
+  private List<Integer> follower = new ArrayList<>();
 
 }

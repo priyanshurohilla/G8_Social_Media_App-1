@@ -62,25 +62,31 @@ public class PostService {
         return deletePostResponse;
     }
 
-    public Response editPost(Post post){
+    public Response editPost(Post post) {
         Response response = new Response();
-        if(post.getContent().equals("") && post.getImageUrl().equals("")){
-            response = new Response();
-            response.setStatus(false);
-            response.setMessage("Empty Post");
+        if (authService.loggedInUser != null) {
+
+            if (post.getContent().equals("") && post.getImageUrl().equals("")) {
+                response = new Response();
+                response.setStatus(false);
+                response.setMessage("Empty Post");
+                return response;
+            }
+            try {
+                Post postToBeEdited = postRepository.findById(post.getPostId());
+                postToBeEdited.setContent(post.getContent());
+                postToBeEdited.setImageUrl(post.getImageUrl());
+                postRepository.save(postToBeEdited);
+                response.setStatus(true);
+                response.setMessage("Post edited successfully : " + post.getPostId());
+            } catch (Exception e) {
+                response.setStatus(false);
+                response.setMessage("Post could not be edited");
+            }
             return response;
+        } else {
+            String exceptionMessage = "You are not logged in.";
+            throw new NotLoggedInException(exceptionMessage);
         }
-        try{
-            Post postToBeEdited = postRepository.findById(post.getPostId());
-            postToBeEdited.setContent(post.getContent());
-            postToBeEdited.setImageUrl(post.getImageUrl());
-            postRepository.save(postToBeEdited);
-            response.setStatus(true);
-            response.setMessage("Post edited successfully : " + post.getPostId());
-        }catch (Exception e){
-            response.setStatus(false);
-            response.setMessage("Post could not be edited");
-        }
-        return response;
     }
 }
