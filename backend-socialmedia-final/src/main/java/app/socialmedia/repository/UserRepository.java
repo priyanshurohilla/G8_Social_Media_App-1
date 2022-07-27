@@ -1,4 +1,11 @@
 package app.socialmedia.repository;
 
-public class UserRepository {
+import app.socialmedia.model.User;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+
+public interface UserRepository extends MongoRepository<User,Integer>
+
+{
+   User findByEmail(String emailId);
 }

@@ -1,79 +1,47 @@
 package app.socialmedia.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
-@Entity
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@Document
 public class User {
 
-    @Id
-    private int userId;
+  @Id
+  private int userId;
 
-    private String fullName;
+  @NotBlank(message = "full name is required")
+  @Size(min = 3, max = 20, message = "full name must be between 3 and 20 characters long")
+  private String fullName;
 
-    private String userName;
+  @NotBlank(message = "Username is required")
+  @Size(min = 3, max = 15, message = "Username must be between 3 and 15 characters long")
+  private String userName;
 
-    private String email;
+  @NotBlank(message = "email is required")
+  @Email( message = "invalid email, try again ")
+  private String email;
 
-    private String profilePicUrl;
+  private String profilePicUrl;
 
-    private String phoneNumber;
+  @Size(min = 0, max = 10)
+  private String phoneNumber;
 
-    private String password;
+  @NotBlank(message = "password is required")
+  @Size(min = 6, max = 20, message = "password must be between 6 and 20 characters long")
+  private String password;
 
-    public int getUserId() {
-        return userId;
-    }
+  private String salt;
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
+ private List<String> following = new ArrayList<>();
 
-    public String getFullName() {
-        return fullName;
-    }
+  private List<String> follower = new ArrayList<>();
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getProfilePicUrl() {
-        return profilePicUrl;
-    }
-
-    public void setProfilePicUrl(String profilePicUrl) {
-        this.profilePicUrl = profilePicUrl;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
