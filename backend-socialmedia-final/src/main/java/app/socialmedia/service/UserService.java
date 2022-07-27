@@ -1,6 +1,7 @@
 package app.socialmedia.service;
 
 
+import app.socialmedia.Exception.NotLoggedInException;
 import app.socialmedia.model.Response;
 import app.socialmedia.model.User;
 import app.socialmedia.repository.UserRepository;
@@ -13,38 +14,45 @@ public class UserService {
 
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    AuthService authService;
 
-    public Response updateUser(int id, User user){
-        User updateUser = userRepository.findById(id);
-        Response updateResponse = new Response();
-        if (updateUser == null) {
-            updateResponse.setStatus(false);
-            updateResponse.setMessage("user does not found with this id: ");
+    public Response updateUser(int id, User user) {
+        if (authService.loggedInUser != null) {
 
-        }else{
+            User updateUser = userRepository.findById(id);
+            Response updateResponse = new Response();
+            if (updateUser == null) {
+                updateResponse.setStatus(false);
+                updateResponse.setMessage("user does not found with this id: ");
 
-            if(user.getFullName()!=null)
-                updateUser.setFullName(user.getFullName());
-            if(user.getUserName()!=null)
-                updateUser.setUserName(user.getUserName());
-            updateUser.setProfilePicUrl(user.getProfilePicUrl());
-            if(user.getPhoneNumber()!=null)
-                updateUser.setPhoneNumber(user.getPhoneNumber());
-            if(user.getPassword()!=null)
-            {
-                String salt = BCrypt.gensalt();
-                String hashPassword = BCrypt.hashpw(user.getPassword() ,salt);
-                updateUser.setPassword(hashPassword);
-                updateUser.setSalt(salt);
+            } else {
+
+                if (user.getFullName() != null)
+                    updateUser.setFullName(user.getFullName());
+                if (user.getUserName() != null)
+                    updateUser.setUserName(user.getUserName());
+                updateUser.setProfilePicUrl(user.getProfilePicUrl());
+                if (user.getPhoneNumber() != null)
+                    updateUser.setPhoneNumber(user.getPhoneNumber());
+                if (user.getPassword() != null) {
+                    String salt = BCrypt.gensalt();
+                    String hashPassword = BCrypt.hashpw(user.getPassword(), salt);
+                    updateUser.setPassword(hashPassword);
+                    updateUser.setSalt(salt);
+                }
+
+                userRepository.save(updateUser);
+
+                updateResponse.setStatus(true);
+                updateResponse.setMessage("Update Successful");
+
             }
-
-            userRepository.save(updateUser);
-
-            updateResponse.setStatus(true);
-            updateResponse.setMessage("Update Successful");
-
+            return updateResponse;
+        } else {
+            String exceptionMessage = "You are not logged in.";
+            throw new NotLoggedInException(exceptionMessage);
         }
-        return updateResponse;
     }
 }
 
