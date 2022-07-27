@@ -34,7 +34,7 @@ public class AuthService {
       String salt = BCrypt.gensalt();
       String hashedPwd = BCrypt.hashpw(user.getPassword(), salt + pepper);
 
-      user.setUserId(mongoDbSequenceGeneratorService.getNextUserSequence(User.SEQUENCE_NAME));
+      user.setUserId(mongoDbSequenceGeneratorService.getNextSequence(User.USER_SEQUENCE_NAME));
       user.setSalt(salt);
       user.setPassword(hashedPwd);
       userRepository.save(user);

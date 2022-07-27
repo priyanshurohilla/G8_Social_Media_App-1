@@ -2,6 +2,7 @@ package app.socialmedia.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
@@ -14,6 +15,8 @@ import java.util.List;
 @Document
 public class Post {
 
+    @Transient
+    public static final  String POST_SEQUENCE_NAME="postSequenceName";
     @Id
     private int postId;
 

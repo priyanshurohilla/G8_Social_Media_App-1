@@ -2,6 +2,7 @@ package app.socialmedia.service;
 
 import app.socialmedia.model.Post;
 import app.socialmedia.model.Response;
+import app.socialmedia.model.User;
 import app.socialmedia.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,9 +14,15 @@ public class PostService {
 
     @Autowired
     PostRepository postRepository;
+
+    @Autowired
+    MongoDbSequenceGeneratorService mongoDbSequenceGeneratorService;
+
     public Response createPost(Post post){
         Response response = new Response();
         try{
+            int postId=mongoDbSequenceGeneratorService.getNextSequence(Post.POST_SEQUENCE_NAME);
+            post.setPostId(postId);
             postRepository.save(post);
             response.setStatus(true);
             response.setMessage("Created Post : " + post.getPostId());
