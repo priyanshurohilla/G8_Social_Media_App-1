@@ -1,14 +1,17 @@
 package app.socialmedia.model;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+@Data
+@Document
 public class Post {
 
     @Id
@@ -24,73 +27,7 @@ public class Post {
 
     private int numberOfLikes;
 
-    @ElementCollection
-    private ArrayList<String> likedBy;
+    private List<Integer> likedBy = new ArrayList<>();
 
-    @OneToMany
-    private ArrayList<CommentEntity> comments;
-
-    public int getPostId() {
-        return postId;
-    }
-
-    public void setPostId(int postId) {
-        this.postId = postId;
-    }
-
-    public int getCreatedByUserId() {
-        return createdByUserId;
-    }
-
-    public void setCreatedByUserId(int createdByUserId) {
-        this.createdByUserId = createdByUserId;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public int getNumberOfLikes() {
-        return numberOfLikes;
-    }
-
-    public void setNumberOfLikes(int numberOfLikes) {
-        this.numberOfLikes = numberOfLikes;
-    }
-
-    public ArrayList<String> getLikedBy() {
-        return likedBy;
-    }
-
-    public void setLikedBy(ArrayList<String> likedBy) {
-        this.likedBy = likedBy;
-    }
-
-    public ArrayList<CommentEntity> getComments() {
-        return comments;
-    }
-
-    public void setComments(ArrayList<CommentEntity> comments) {
-        this.comments = comments;
-    }
+    private List<CommentEntity> comments = new ArrayList<>();
 }
