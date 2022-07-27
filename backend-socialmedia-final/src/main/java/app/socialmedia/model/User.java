@@ -2,6 +2,7 @@ package app.socialmedia.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -14,6 +15,8 @@ import java.util.List;
 @Document
 public class User {
 
+  @Transient
+  public static final  String SEQUENCE_NAME="user_sequenceName";
   @Id
   private int userId;
 
