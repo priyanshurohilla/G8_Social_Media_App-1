@@ -1,15 +1,15 @@
 package app.socialmedia.controller;
 
+import app.socialmedia.Exception.UserNotFoundException;
 import app.socialmedia.model.LoginRequest;
 import app.socialmedia.model.Response;
 import app.socialmedia.model.User;
 import app.socialmedia.service.AuthService;
+import app.socialmedia.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -48,5 +48,11 @@ public class AuthController {
       Response loginResponse = null;
       return new ResponseEntity<Response>(loginResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+  @GetMapping(value="/logout/{user}", produces = "application/json")
+  public ResponseEntity<Response> logout(@PathVariable(name = "user") int userId) {
+
+      return new ResponseEntity<Response>(authService.logoutUser(userId), HttpStatus.OK);
+
   }
 }
