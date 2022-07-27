@@ -1,5 +1,7 @@
 package app.socialmedia.Exception;
 
+import app.socialmedia.model.Response;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -23,5 +25,13 @@ public class GlobalExceptionHandler {
         });
 
         return new ResponseEntity<Map<String,String>>(response, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Response> handleLogoutException(UserNotFoundException e) {
+        String exceptionMessage = e.getMessage();
+        Response logoutResponse = new Response();
+        logoutResponse.setStatus(false);
+        logoutResponse.setMessage(exceptionMessage);
+        return new ResponseEntity<Response>(logoutResponse, HttpStatus.BAD_REQUEST);
     }
 }
