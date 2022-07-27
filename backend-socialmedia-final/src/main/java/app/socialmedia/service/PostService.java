@@ -1,7 +1,11 @@
 package app.socialmedia.service;
 
+import app.socialmedia.Exception.ActionCannotBeCompletedException;
+import app.socialmedia.Exception.NotLoggedInException;
+import app.socialmedia.Exception.PostNotFoundException;
 import app.socialmedia.model.Post;
 import app.socialmedia.model.Response;
+import app.socialmedia.model.User;
 import app.socialmedia.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,18 +17,49 @@ public class PostService {
 
     @Autowired
     PostRepository postRepository;
-    public Response createPost(Post post){
+    @Autowired
+    AuthService authService;
+    public Response createPost(Post post) {
         Response response = new Response();
-        try{
-            postRepository.save(post);
-            response.setStatus(true);
-            response.setMessage("Created Post : " + post.getPostId());
+
+            if (authService.loggedInUser != null) {
+
+                try {
+                    postRepository.save(post);
+                    response.setStatus(true);
+                    response.setMessage("Created Post :" + post.getPostId());
+                } catch (Exception e) {
+                    response.setStatus(false);
+                    response.setMessage("Could not create post");
+                }
+                return response;
+            } else {
+                String exceptionMessage = "You are not logged in.";
+                throw new NotLoggedInException(exceptionMessage);
+            }
         }
-        catch (Exception e){
-            response.setStatus(false);
-            response.setMessage("Could not create post");
+
+    public Response deletePost(int postId){
+        Response deletePostResponse = new Response();
+        if(authService.loggedInUser!=null){
+            try{
+                Post post = postRepository.findById(postId);
+                    postRepository.delete(post);
+                    deletePostResponse.setStatus(true);
+                    deletePostResponse.setMessage("Deleted successfully");
+
+            }
+            catch(Exception e){
+                String message = "Post with postId "+postId+" not Found";
+                throw new PostNotFoundException(message);
+            }
+
         }
-        return response;
+        else{
+            String exceptionMessage = "You are not logged in.";
+            throw new NotLoggedInException(exceptionMessage);
+        }
+        return deletePostResponse;
     }
 
     public Response editPost(Post post){
