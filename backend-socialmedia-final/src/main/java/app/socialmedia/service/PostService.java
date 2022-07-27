@@ -18,11 +18,33 @@ public class PostService {
         try{
             postRepository.save(post);
             response.setStatus(true);
-            response.setMessage("Created Post :" + post.getPostId());
+            response.setMessage("Created Post : " + post.getPostId());
         }
         catch (Exception e){
             response.setStatus(false);
             response.setMessage("Could not create post");
+        }
+        return response;
+    }
+
+    public Response editPost(Post post){
+        Response response = new Response();
+        if(post.getContent().equals("") && post.getImageUrl().equals("")){
+            response = new Response();
+            response.setStatus(false);
+            response.setMessage("Empty Post");
+            return response;
+        }
+        try{
+            Post postToBeEdited = postRepository.findById(post.getPostId());
+            postToBeEdited.setContent(post.getContent());
+            postToBeEdited.setImageUrl(post.getImageUrl());
+            postRepository.save(postToBeEdited);
+            response.setStatus(true);
+            response.setMessage("Post edited successfully : " + post.getPostId());
+        }catch (Exception e){
+            response.setStatus(false);
+            response.setMessage("Post could not be edited");
         }
         return response;
     }

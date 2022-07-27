@@ -1,0 +1,11 @@
+app/socialmedia/repository/UserRepository.class
+app/socialmedia/model/Response.class
+app/socialmedia/Main.class
+app/socialmedia/Exception/GlobalExceptionHandler.class
+app/socialmedia/controller/AuthController.class
+app/socialmedia/service/AuthService.class
+app/socialmedia/configuration/WebSecurityConfig.class
+app/socialmedia/model/LoginRequest.class
+app/socialmedia/service/UserService.class
+app/socialmedia/controller/UserController.class
+app/socialmedia/model/User.class
