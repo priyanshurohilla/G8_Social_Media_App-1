@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
   @Autowired UserRepository userRepository;
+  @Autowired MongoDbSequenceGeneratorService mongoDbSequenceGeneratorService;
 
   @Value("${pepper}")
   String pepper;
@@ -26,8 +27,11 @@ public class AuthService {
       Response.setMessage("User already exist with this email: " + user.getEmail());
 
     } else {
+
       String salt = BCrypt.gensalt();
       String hashedPwd = BCrypt.hashpw(user.getPassword(), salt + pepper);
+
+      user.setUserId(mongoDbSequenceGeneratorService.getNextUserSequence(User.SEQUENCE_NAME));
       user.setSalt(salt);
       user.setPassword(hashedPwd);
       userRepository.save(user);
