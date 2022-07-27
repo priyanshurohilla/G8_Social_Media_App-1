@@ -34,4 +34,28 @@ public class GlobalExceptionHandler {
         logoutResponse.setMessage(exceptionMessage);
         return new ResponseEntity<Response>(logoutResponse, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(NotLoggedInException.class)
+    public ResponseEntity<Response> handleNotLoggedInException(NotLoggedInException e) {
+        String exceptionMessage = e.getMessage();
+        Response postResponse = new Response();
+        postResponse.setStatus(false);
+        postResponse.setMessage(exceptionMessage);
+        return new ResponseEntity<Response>(postResponse, HttpStatus.UNAUTHORIZED);
+    }
+    @ExceptionHandler(PostNotFoundException.class)
+    public ResponseEntity<Response> handlePostNotFoundException(PostNotFoundException e) {
+        String exceptionMessage = e.getMessage();
+        Response postResponse = new Response();
+        postResponse.setStatus(false);
+        postResponse.setMessage(exceptionMessage);
+        return new ResponseEntity<Response>(postResponse, HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(ActionCannotBeCompletedException.class)
+    public ResponseEntity<Response> handleActionCannotBeCompletedException(ActionCannotBeCompletedException e) {
+        String exceptionMessage = e.getMessage();
+        Response postResponse = new Response();
+        postResponse.setStatus(false);
+        postResponse.setMessage(exceptionMessage);
+        return new ResponseEntity<Response>(postResponse, HttpStatus.CONFLICT);
+    }
 }

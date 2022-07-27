@@ -7,9 +7,7 @@ import app.socialmedia.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class PostController {
@@ -43,15 +41,19 @@ public class PostController {
     }
 
     @PostMapping(value = "/editpost",consumes = "application/json", produces = "application/json")
-    public  ResponseEntity<Response> edit(@RequestBody Post post){
+    public  ResponseEntity<Response> edit(@RequestBody Post post) {
 
         Response response = postService.editPost(post);
 
-        if(response.isStatus()){
+        if (response.isStatus()) {
             return new ResponseEntity<Response>(response, HttpStatus.OK);
-        }else {
+        } else {
             return new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
 
+    @DeleteMapping(value="/deletepost/{postid}", produces = "application/json")
+    public ResponseEntity<Response> deletePost(@PathVariable(name = "postid") int postId){
+        return new ResponseEntity<Response>(postService.deletePost(postId), HttpStatus.OK);
     }
 }
