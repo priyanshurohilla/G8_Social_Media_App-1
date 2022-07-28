@@ -1,17 +1,25 @@
 package app.socialmedia.service;
 
 
+import app.socialmedia.Exception.ActionCannotBeCompletedException;
+import app.socialmedia.Exception.NotAuthorizedException;
 import app.socialmedia.Exception.NotLoggedInException;
 import app.socialmedia.model.Follower;
+import app.socialmedia.Exception.UserNotFoundException;
+import app.socialmedia.model.PublicProfile;
+
 import app.socialmedia.model.Response;
 import app.socialmedia.model.User;
 import app.socialmedia.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.Null;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -162,5 +170,67 @@ public class UserService {
 
     }
 
-}
+
+    public Response deleteUser(int userId){
+        if(authService.loggedInUser!=null){
+            Response deleteUserResponse = new Response();
+
+            User deleteUser = userRepository.findById(userId);
+
+            if(deleteUser==null){
+                String msg= "User with userId "+ userId+" does not exist";
+                throw new UserNotFoundException(msg);
+            }
+
+                if (authService.loggedInUser.getUserId() == userId) {
+                    try {
+                        userRepository.delete(deleteUser);
+                        deleteUserResponse.setStatus(true);
+                        deleteUserResponse.setMessage("Deleted Successfully");
+                    }
+                    catch (Exception e){
+                        String msg= "The user cannot be deleted";
+                        throw new ActionCannotBeCompletedException(msg);
+                    }
+                } else {
+                    String msg = "You cant delete someone else's profile";
+                    throw new NotAuthorizedException(msg);
+                }
+
+
+            return deleteUserResponse;
+        }
+        else{
+            String exceptionMessage = "You are not logged in.";
+            throw new NotLoggedInException(exceptionMessage);
+        }
+    }
+
+    public Response viewPublicProfile(String email){
+            Response searchUserResponse= new Response();
+            try{
+                User user = userRepository.findByEmail(email);
+                PublicProfile publicProfile= new PublicProfile();
+                publicProfile.setFullName(user.getFullName());
+                publicProfile.setUserName(user.getUserName());
+                publicProfile.setProfilePicUrl(user.getProfilePicUrl());
+                publicProfile.setNoOfFollowers(user.getFollower().size());
+                publicProfile.setNoOfFollowing(user.getFollowing().size());
+                searchUserResponse.setStatus(true);
+                searchUserResponse.setMessage("Found successfully");
+                searchUserResponse.setPayload(publicProfile);
+            }
+            catch(NullPointerException e){
+                String msg= "User with emailId "+email+" does not exist";
+                throw new UserNotFoundException(msg);
+            }
+            catch(Exception e){
+                String msg = "Action cannot be completed";
+
+                throw new ActionCannotBeCompletedException(msg);
+            }
+            return searchUserResponse;
+        }
+    }
+
 
