@@ -4,6 +4,7 @@ package app.socialmedia.controller;
 import app.socialmedia.model.Follower;
 import app.socialmedia.model.Response;
 import app.socialmedia.model.User;
+import app.socialmedia.model.ViewProfile;
 import app.socialmedia.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -66,6 +67,11 @@ public class UserController {
     @GetMapping(value = "/search", produces = "application/json")
     public ResponseEntity<Response> searchUser(@RequestParam(value= "email") String userEmail){
         return new ResponseEntity<Response>(userService.viewPublicProfile(userEmail), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/view-profile",produces = "application/json")
+    public ViewProfile getObjectById(@RequestParam String email){
+        return userService.getProfile(email);
     }
 
 }

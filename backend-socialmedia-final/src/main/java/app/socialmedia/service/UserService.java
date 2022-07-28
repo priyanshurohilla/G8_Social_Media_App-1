@@ -4,12 +4,9 @@ package app.socialmedia.service;
 import app.socialmedia.Exception.ActionCannotBeCompletedException;
 import app.socialmedia.Exception.NotAuthorizedException;
 import app.socialmedia.Exception.NotLoggedInException;
-import app.socialmedia.model.Follower;
+import app.socialmedia.model.*;
 import app.socialmedia.Exception.UserNotFoundException;
-import app.socialmedia.model.PublicProfile;
 
-import app.socialmedia.model.Response;
-import app.socialmedia.model.User;
 import app.socialmedia.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.method.P;
@@ -230,6 +227,33 @@ public class UserService {
                 throw new ActionCannotBeCompletedException(msg);
             }
             return searchUserResponse;
+        }
+
+    public ViewProfile getProfile(String email){
+        if (authService.loggedInUser != null) {
+            User viewUser = userRepository.findByEmail(email);
+            ViewProfile viewProfile = new ViewProfile();
+            if(viewUser == null){
+                throw new UserNotFoundException("could not found the emailId");
+            }else{
+                if(authService.loggedInUser.getEmail().equals(email)){
+                    viewProfile.setFullName(viewUser.getFullName());
+                    viewProfile.setUserName(viewUser.getUserName());
+                    viewProfile.setEmail(viewUser.getEmail());
+                    viewProfile.setPhoneNumber(viewUser.getPhoneNumber());
+                    viewProfile.setFollower(viewUser.getFollower().size());
+                    viewProfile.setFollowing(viewUser.getFollowing().size());
+                }
+                else{
+                    throw new NotLoggedInException("You are not that person logged in");
+                }
+            }
+            return viewProfile;
+        }
+        else{
+            String exceptionMessage = "You are not logged in.";
+            throw new NotLoggedInException(exceptionMessage);
+            }
         }
     }
 
