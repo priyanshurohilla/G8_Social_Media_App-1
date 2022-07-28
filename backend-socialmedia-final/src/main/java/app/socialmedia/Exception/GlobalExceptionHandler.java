@@ -37,10 +37,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotLoggedInException.class)
     public ResponseEntity<Response> handleNotLoggedInException(NotLoggedInException e) {
         String exceptionMessage = e.getMessage();
-        Response postResponse = new Response();
-        postResponse.setStatus(false);
-        postResponse.setMessage(exceptionMessage);
-        return new ResponseEntity<Response>(postResponse, HttpStatus.UNAUTHORIZED);
+        Response loginResponse = new Response();
+        loginResponse.setStatus(false);
+        loginResponse.setMessage(exceptionMessage);
+        return new ResponseEntity<Response>(loginResponse, HttpStatus.UNAUTHORIZED);
     }
     @ExceptionHandler(PostNotFoundException.class)
     public ResponseEntity<Response> handlePostNotFoundException(PostNotFoundException e) {
@@ -53,9 +53,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ActionCannotBeCompletedException.class)
     public ResponseEntity<Response> handleActionCannotBeCompletedException(ActionCannotBeCompletedException e) {
         String exceptionMessage = e.getMessage();
-        Response postResponse = new Response();
-        postResponse.setStatus(false);
-        postResponse.setMessage(exceptionMessage);
-        return new ResponseEntity<Response>(postResponse, HttpStatus.CONFLICT);
+        Response generalResponse = new Response();
+        generalResponse.setStatus(false);
+        generalResponse.setMessage(exceptionMessage);
+        return new ResponseEntity<Response>(generalResponse, HttpStatus.CONFLICT);
+    }
+    @ExceptionHandler(NotAuthorizedException.class)
+    public ResponseEntity<Response> handleNotAuthorizedException(NotAuthorizedException e) {
+        String exceptionMessage = e.getMessage();
+        Response authorizationResponse = new Response();
+        authorizationResponse.setStatus(false);
+        authorizationResponse.setMessage(exceptionMessage);
+        return new ResponseEntity<Response>(authorizationResponse, HttpStatus.UNAUTHORIZED);
+    }
+    @ExceptionHandler(AlreadyLoggedInException.class)
+    public ResponseEntity<Response> handleAlreadyLoggedInException(AlreadyLoggedInException e) {
+        String exceptionMessage = e.getMessage();
+        Response loginResponse = new Response();
+        loginResponse.setStatus(false);
+        loginResponse.setMessage(exceptionMessage);
+        return new ResponseEntity<Response>(loginResponse, HttpStatus.BAD_REQUEST);
     }
 }

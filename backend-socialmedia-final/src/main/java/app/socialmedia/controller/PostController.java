@@ -56,9 +56,10 @@ public class PostController {
         }
     }
 
-    @DeleteMapping(value="/deletepost/{postid}", produces = "application/json")
-    public ResponseEntity<Response> deletePost(@PathVariable(name = "postid") int postId){
+    @DeleteMapping(value="post/delete/{postid}", produces = "application/json")
+    public ResponseEntity<Response> deletePost(@PathVariable(name = "postid") int postId) {
         return new ResponseEntity<Response>(postService.deletePost(postId), HttpStatus.OK);
+
     }
 
     @PostMapping(value = "/comment-add",consumes = "application/json", produces = "application/json")
