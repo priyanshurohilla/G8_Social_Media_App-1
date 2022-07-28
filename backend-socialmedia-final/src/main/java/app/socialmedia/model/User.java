@@ -16,7 +16,7 @@ import java.util.List;
 public class User {
 
   @Transient
-  public static final  String SEQUENCE_NAME="user_sequenceName";
+  public static final  String USER_SEQUENCE_NAME="UserSequenceName";
   @Id
   private int userId;
 

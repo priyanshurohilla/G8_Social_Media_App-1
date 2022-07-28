@@ -1,5 +1,7 @@
 package app.socialmedia.controller;
 
+import app.socialmedia.model.CommentEntity;
+import app.socialmedia.model.CommentRequest;
 import app.socialmedia.model.Post;
 import app.socialmedia.model.Response;
 import app.socialmedia.service.AuthService;
@@ -8,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 public class PostController {
@@ -56,4 +60,22 @@ public class PostController {
     public ResponseEntity<Response> deletePost(@PathVariable(name = "postid") int postId){
         return new ResponseEntity<Response>(postService.deletePost(postId), HttpStatus.OK);
     }
+
+    @PostMapping(value = "/comment-add",consumes = "application/json", produces = "application/json")
+    public  ResponseEntity<Response> addComment( @RequestBody CommentRequest commentRequest) {
+          Response response=postService.addComment(commentRequest);
+        if (response.isStatus()) {
+            return new ResponseEntity<Response>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping(value="/comment-delete/{commentId}", produces = "application/json")
+    public ResponseEntity<Response> deleteComment(@PathVariable(name = "commentId") String commentId){
+        return new ResponseEntity<Response>(postService.deleteComment(commentId), HttpStatus.OK);
+    }
+
+
+
 }
