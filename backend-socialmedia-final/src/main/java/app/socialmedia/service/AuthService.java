@@ -1,6 +1,7 @@
 package app.socialmedia.service;
 
 
+import app.socialmedia.Exception.AlreadyLoggedInException;
 import app.socialmedia.Exception.UserNotFoundException;
 import app.socialmedia.model.LoginRequest;
 import app.socialmedia.model.Response;
@@ -45,28 +46,33 @@ public class AuthService {
   }
 
   public Response loginUser(LoginRequest loginRequest) {
-    User user = userRepository.findByEmail(loginRequest.getEmail());
     Response loginResponse = new Response();
+    if(loggedInUser==null) {
+      User user = userRepository.findByEmail(loginRequest.getEmail());
 
-    if (user == null) {
-      loginResponse.setStatus(false);
-      loginResponse.setMessage("user does not found with this email: " + loginRequest.getEmail());
-
-    }else {
-      String salt = user.getSalt();
-      String hashedPwd = BCrypt.hashpw(loginRequest.getPassword(), salt + pepper);
-      if (hashedPwd.equals(user.getPassword())) {
-        loggedInUser = user;
-        loginResponse.setStatus(true);
-        loginResponse.setMessage("Login successful for user : " + user.getUserName());
-        loginResponse.setPayload(user);
+      if (user == null) {
+        loginResponse.setStatus(false);
+        loginResponse.setMessage("user does not found with this email: " + loginRequest.getEmail());
 
       } else {
-        loginResponse.setStatus(false);
-        loginResponse.setMessage("invalid password: "+loginRequest.getPassword());
+        String salt = user.getSalt();
+        String hashedPwd = BCrypt.hashpw(loginRequest.getPassword(), salt + pepper);
+        if (hashedPwd.equals(user.getPassword())) {
+          loggedInUser = user;
+          loginResponse.setStatus(true);
+          loginResponse.setMessage("Login successful for user : " + user.getUserName());
+
+        } else {
+          loginResponse.setStatus(false);
+          loginResponse.setMessage("invalid password: " + loginRequest.getPassword());
+        }
       }
+      return loginResponse;
+    }else{
+      String msg= "You are already logged in";
+      throw new AlreadyLoggedInException(msg);
     }
-    return loginResponse;
+
   }
   public Response logoutUser(int userId){
     Response logoutResponse = new Response();

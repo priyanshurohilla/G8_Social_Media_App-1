@@ -36,18 +36,12 @@ public class AuthController {
 
   @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
   public ResponseEntity<Response> login( @Valid @RequestBody LoginRequest loginRequest) {
-    try {
       Response loginResponse = authService.loginUser(loginRequest);
       if (loginResponse.isStatus()) {
         return new ResponseEntity<Response>(loginResponse, HttpStatus.OK);
       } else {
         return new ResponseEntity<Response>(loginResponse, HttpStatus.BAD_REQUEST);
       }
-
-    } catch (Exception e) {
-      Response loginResponse = null;
-      return new ResponseEntity<Response>(loginResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
   }
   @GetMapping(value="/logout/{user}", produces = "application/json")
   public ResponseEntity<Response> logout(@PathVariable(name = "user") int userId) {

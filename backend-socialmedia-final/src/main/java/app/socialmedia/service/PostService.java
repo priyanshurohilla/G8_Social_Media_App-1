@@ -1,6 +1,7 @@
 package app.socialmedia.service;
 
 import app.socialmedia.Exception.ActionCannotBeCompletedException;
+import app.socialmedia.Exception.NotAuthorizedException;
 import app.socialmedia.Exception.NotLoggedInException;
 import app.socialmedia.Exception.PostNotFoundException;
 import app.socialmedia.model.*;
@@ -51,27 +52,40 @@ public class PostService {
       throw new NotLoggedInException(exceptionMessage);
     }
   }
+    public Response deletePost(int postId){
+        Response deletePostResponse = new Response();
+        if(authService.loggedInUser!=null){
 
-  public Response deletePost(int postId) {
-    Response deletePostResponse = new Response();
-    if (authService.loggedInUser != null) {
-      try {
-        Post post = postRepository.findById(postId);
-        postRepository.delete(post);
-        deletePostResponse.setStatus(true);
-        deletePostResponse.setMessage("Deleted successfully");
+                    Post post = postRepository.findById(postId);
+                    if(post==null){
+                        String message = "Post with postId "+postId+" not Found";
+                        throw new PostNotFoundException(message);
+                    }
 
-      } catch (Exception e) {
-        String message = "Post with postId " + postId + " not Found";
-        throw new PostNotFoundException(message);
-      }
 
-    } else {
-      String exceptionMessage = "You are not logged in.";
-      throw new NotLoggedInException(exceptionMessage);
+                    if(authService.loggedInUser.getUserId()==post.getCreatedByUserId()) {
+                        try {
+                            postRepository.delete(post);
+                            deletePostResponse.setStatus(true);
+                            deletePostResponse.setMessage("Deleted successfully");
+                        } catch (Exception e) {
+                            String msg = "The post cannot be deleted";
+                            throw new ActionCannotBeCompletedException(msg);
+                        }
+                    }
+                    else{
+                        String msg = "You cant delete someone else's post";
+                        throw new NotAuthorizedException(msg);
+                    }
+            }
+        else{
+            String exceptionMessage = "You are not logged in.";
+            throw new NotLoggedInException(exceptionMessage);
+        }
+        return deletePostResponse;
+
     }
-    return deletePostResponse;
-  }
+
 
   public Response editPost(Post post) {
     Response response = new Response();

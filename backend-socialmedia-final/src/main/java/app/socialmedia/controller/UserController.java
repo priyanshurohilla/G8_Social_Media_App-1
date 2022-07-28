@@ -28,6 +28,7 @@ public class UserController {
         }
     }
 
+
     @PutMapping(value = "/addFollower", produces = "application/json")
     public ResponseEntity<Response> addFollowerToList(@RequestParam int userId, @RequestParam int userIdTwo){
         Response response = userService.addFollower(userId, userIdTwo);
@@ -56,6 +57,15 @@ public class UserController {
             }else{
                 return new ResponseEntity<Response>(response, HttpStatus.BAD_REQUEST);
             }
+    }
+
+    @DeleteMapping(value="user/deleteprofile/{userId}", produces ="application/json")
+    public ResponseEntity<Response> deleteUser(@PathVariable(name = "userId") int userId){
+        return new ResponseEntity<Response>(userService.deleteUser(userId), HttpStatus.OK);
+    }
+    @GetMapping(value = "/search", produces = "application/json")
+    public ResponseEntity<Response> searchUser(@RequestParam(value= "email") String userEmail){
+        return new ResponseEntity<Response>(userService.viewPublicProfile(userEmail), HttpStatus.OK);
     }
 
 }
