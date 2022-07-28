@@ -77,6 +77,10 @@ public class PostController {
         return new ResponseEntity<Response>(postService.deleteComment(commentId), HttpStatus.OK);
     }
 
+    @GetMapping(value="/get-comments/{postId}", produces = "application/json")
+    public ResponseEntity<Response> getViewComment(@PathVariable(name = "postId") int postId){
+        return new ResponseEntity<Response>(postService.ViewAllComment(postId), HttpStatus.OK);
+    }
 
 
 }
