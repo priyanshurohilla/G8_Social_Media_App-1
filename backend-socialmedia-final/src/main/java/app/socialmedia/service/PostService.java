@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -150,7 +151,7 @@ public class PostService {
   }
 
   public Response deleteComment(String commentId) {
-    Response deletePostResponse = new Response();
+    Response response = new Response();
     if (authService.loggedInUser != null) {
       try {
         CommentEntity commentEntity = commentRepository.findByCommentId(commentId);
@@ -160,9 +161,8 @@ public class PostService {
         post.setComments(commentList);
         postRepository.save(post);
         commentRepository.delete(commentEntity);
-        deletePostResponse.setStatus(true);
-        deletePostResponse.setMessage(" Comment successfully deleted");
-
+        response.setStatus(true);
+        response.setMessage(" Comment successfully deleted");
       } catch (Exception e) {
         String message = "comment not found with commentId " + commentId;
         throw new PostNotFoundException(message);
@@ -172,6 +172,42 @@ public class PostService {
       String exceptionMessage = "You are not logged in.";
       throw new NotLoggedInException(exceptionMessage);
     }
-    return deletePostResponse;
+    return response;
   }
+
+  public Response ViewAllComment(int postId)
+  {   Response response = new Response();
+
+      List<CommentViewData>allCommenter= new ArrayList<CommentViewData>();
+    if (authService.loggedInUser != null) {
+      try {
+          Post post =postRepository.findById(postId);
+          List<String>commentList=post.getComments();
+          for (String commentId :commentList ) {
+               CommentEntity commentEntity=commentRepository.findByCommentId(commentId);
+               CommentViewData commentViewData=new CommentViewData();
+               commentViewData.setContent(commentEntity.getContent());
+               commentViewData.setTimeStamp(commentEntity.getTimeStamp());
+               commentViewData.setFullName(commentEntity.getFullName());
+               allCommenter.add(commentViewData);
+          }
+        response.setStatus(true);
+        response.setMessage("fetched all commenter successfully!");
+        response.setPayload(allCommenter);
+      } catch (Exception e) {
+        String message = "post with postId "+postId+" does not found";
+        throw new PostNotFoundException(message);
+      }
+
+    } else {
+      String exceptionMessage = "You are not logged in.";
+      throw new NotLoggedInException(exceptionMessage);
+    }
+    return  response;
+  }
+
+
+
+
+
 }
