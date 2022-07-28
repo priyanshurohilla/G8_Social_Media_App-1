@@ -32,5 +32,6 @@ public class Post {
 
     private List<Integer> likedBy = new ArrayList<>();
 
-    private List<CommentEntity> comments = new ArrayList<>();
+    private List<String> comments = new ArrayList<>();
+
 }
