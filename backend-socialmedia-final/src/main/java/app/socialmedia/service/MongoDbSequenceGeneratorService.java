@@ -1,6 +1,6 @@
 package app.socialmedia.service;
 
-import app.socialmedia.model.UserDbSequence;
+import app.socialmedia.model.DbSequence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Query;
@@ -18,11 +18,13 @@ public class MongoDbSequenceGeneratorService {
  @Autowired
     private MongoOperations mongoOperations;
 
- public int getNextUserSequence(String userSequenceName){
-     UserDbSequence counter =mongoOperations.findAndModify(Query.query(where("_sequenceName").is(userSequenceName)),
+ public int getNextSequence(String sequenceName){
+     DbSequence counter =mongoOperations.findAndModify(Query.query(where("_sequenceName").is(sequenceName)),
              new Update().inc("sequence_number",1), options().returnNew(true).upsert(true),
-             UserDbSequence.class);
+             DbSequence.class);
      return  counter.getSequence_number();
  }
- }
+    }
+
+
 
