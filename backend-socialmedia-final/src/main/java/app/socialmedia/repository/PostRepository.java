@@ -9,4 +9,6 @@ public interface PostRepository extends MongoRepository<Post, Integer> {
 
     Post findById(int postId);
     List<Post> findByCreatedByUserId(int userId);
+
+
 }

@@ -1,9 +1,6 @@
 package app.socialmedia.controller;
 
-import app.socialmedia.model.CommentEntity;
-import app.socialmedia.model.CommentRequest;
-import app.socialmedia.model.Post;
-import app.socialmedia.model.Response;
+import app.socialmedia.model.*;
 import app.socialmedia.service.AuthService;
 import app.socialmedia.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +39,40 @@ public class PostController {
             return new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+
+    @PostMapping(value = "/getposts/{userId}")
+    public ResponseEntity<Response> getPosts(@PathVariable(value = "userId") Integer userId){
+        Response response = postService.fetchPosts(userId);
+        if(response.isStatus()){
+            return new ResponseEntity<Response>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+    @PostMapping(value = "/likeupdate", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Response> like(@RequestBody LikeRequest likeRequest){
+        Response response = postService.likePost(likeRequest);
+
+        if(response.isStatus()){
+            return new ResponseEntity<Response>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping(value = "/viewlikes/{postId}")
+    public ResponseEntity<Response> viewLikes(@PathVariable(value = "postId") Integer postId){
+        Response response = postService.viewLikes(postId);
+        if(response.isStatus()){
+            return new ResponseEntity<Response>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<Response>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping(value = "/editpost",consumes = "application/json", produces = "application/json")

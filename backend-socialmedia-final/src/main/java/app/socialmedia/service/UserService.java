@@ -65,50 +65,61 @@ public class UserService {
     }
 
     public Response addFollower(int userId, int followerUserId){
-        Response response = new Response();
 
-        User user = userRepository.findById(userId);
+        if(authService.loggedInUser != null) {
+            if(authService.loggedInUser.getUserId() == userId) {
+                Response response = new Response();
 
-        User follower = userRepository.findById(followerUserId);
+                User user = userRepository.findById(userId);
 
-        boolean find = false;
-        try{
-            if(user != null && follower != null){
-                List<Integer> followersIds = user.getFollower();
-                List<Integer> followingIds = follower.getFollowing();
+                User follower = userRepository.findById(followerUserId);
 
-                for(int Id : followersIds){
-                    if(Id == followerUserId){
-                        find = true;
-                        break;
+                boolean find = false;
+                try {
+                    if (user != null && follower != null) {
+                        List<Integer> followersIds = user.getFollower();
+                        List<Integer> followingIds = follower.getFollowing();
+
+                        for (int Id : followersIds) {
+                            if (Id == followerUserId) {
+                                find = true;
+                                break;
+                            }
+                        }
+                        if (find) {
+                            response.setStatus(false);
+                            response.setMessage("Follower already exists");
+                            return response;
+                        } else {
+                            followersIds.add(followerUserId);
+                            followingIds.add(userId);
+                            user.setFollower(followersIds);
+                            follower.setFollowing(followingIds);
+                            userRepository.save(user);
+                            userRepository.save(follower);
+                            response.setStatus(true);
+                            response.setMessage("Follower added successfully");
+                        }
+                    } else if (user == null) {
+                        response.setStatus(false);
+                        response.setMessage("User doesn't exist");
+                    } else {
+                        response.setStatus(false);
+                        response.setMessage("Follower doesn't exist");
                     }
-                }
-                if(find){
-                    response.setStatus(false);
-                    response.setMessage("Follower already exists");
                     return response;
-                }else{
-                    followersIds.add(followerUserId);
-                    followingIds.add(userId);
-                    user.setFollower(followersIds);
-                    follower.setFollowing(followingIds);
-                    userRepository.save(user);
-                    userRepository.save(follower);
-                    response.setStatus(true);
-                    response.setMessage("Follower added successfully");
+                } catch (Exception e) {
+                    response.setStatus(false);
+                    response.setMessage("Follower could not be added");
+                    return response;
                 }
-            }else if(user == null){
-                response.setStatus(false);
-                response.setMessage("User doesn't exist");
-            }else{
-                response.setStatus(false);
-                response.setMessage("Follower doesn't exist");
+            } else {
+                String message = "You are not authorized";
+                throw new NotAuthorizedException(message);
             }
-            return response;
-        }catch (Exception e){
-            response.setStatus(false);
-            response.setMessage("Follower could not be added");
-            return response;
+        } else {
+            String exceptionMessage = "You are not logged in.";
+            throw new NotLoggedInException(exceptionMessage);
         }
     }
 
@@ -147,24 +158,34 @@ public class UserService {
     }
 
     public Response removeFollower(int userId, int followerUserId){
-        Response response = new Response();
-        User user = userRepository.findById(userId);
-        User follower = userRepository.findById(followerUserId);
-            List<Integer> followersIds = user.getFollower();
-            List<Integer> followingIds = follower.getFollowing();
-            if(followersIds.contains(followerUserId) && followingIds.contains(userId)){
-                followersIds.remove(followersIds.indexOf(followerUserId));
-                followingIds.remove(followingIds.indexOf(userId));
+
+        if(authService.loggedInUser != null) {
+            if (authService.loggedInUser.getUserId() == userId) {
+                Response response = new Response();
+                User user = userRepository.findById(userId);
+                User follower = userRepository.findById(followerUserId);
+                List<Integer> followersIds = user.getFollower();
+                List<Integer> followingIds = follower.getFollowing();
+                if (followersIds.contains(followerUserId) && followingIds.contains(userId)) {
+                    followersIds.remove(followersIds.indexOf(followerUserId));
+                    followingIds.remove(followingIds.indexOf(userId));
+                }
+                user.setFollower(followersIds);
+                follower.setFollowing(followingIds);
+                userRepository.save(user);
+                userRepository.save(follower);
+                response.setStatus(true);
+                response.setMessage("Follower removed");
+
+                return response;
+            } else {
+                String message = "You are not authorized";
+                throw new NotAuthorizedException(message);
             }
-            user.setFollower(followersIds);
-            follower.setFollowing(followingIds);
-            userRepository.save(user);
-            userRepository.save(follower);
-            response.setStatus(true);
-            response.setMessage("Follower removed");
-
-            return response;
-
+        } else {
+            String exceptionMessage = "You are not logged in.";
+            throw new NotLoggedInException(exceptionMessage);
+        }
     }
 
 
