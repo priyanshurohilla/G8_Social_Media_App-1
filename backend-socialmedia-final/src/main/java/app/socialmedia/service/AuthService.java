@@ -61,6 +61,7 @@ public class AuthService {
           loggedInUser = user;
           loginResponse.setStatus(true);
           loginResponse.setMessage("Login successful for user : " + user.getUserName());
+          loginResponse.setPayload(user);
 
         } else {
           loginResponse.setStatus(false);

@@ -87,7 +87,6 @@ public class PostService {
 
     }
 
-
   public Response editPost(Post post) {
     Response response = new Response();
     if (authService.loggedInUser != null) {
@@ -219,7 +218,49 @@ public class PostService {
     }
     return  response;
   }
-
+public Response viewMyPosts(int userId){
+      Response viewMyPostsResponse = new Response();
+      if(authService.loggedInUser!=null){
+          List<Post> posts = postRepository.findByCreatedByUserId(userId);
+          if(posts.size()==0){
+              String msg = "No posts found";
+              throw new PostNotFoundException(msg);
+          }
+          ViewMyPostsEntity viewMyPostsEntity = new ViewMyPostsEntity();
+          List<ViewMyPostsEntity> viewMyPosts = new ArrayList<>();
+          if(authService.loggedInUser.getUserId()==userId){
+            try {
+                for (Post post : posts) {
+                    viewMyPostsEntity.setPostId(post.getPostId());
+                    viewMyPostsEntity.setContent(post.getContent());
+                    viewMyPostsEntity.setNumberOfComments(post.getComments().size());
+                    viewMyPostsEntity.setNumberOfLikes(post.getLikedBy().size());
+                    viewMyPostsEntity.setUserName(authService.loggedInUser.getUserName());
+                    viewMyPostsEntity.setFullName(authService.loggedInUser.getFullName());
+                    viewMyPostsEntity.setTimestamp(post.getTimestamp());
+                    viewMyPostsEntity.setImageUrl(post.getImageUrl());
+                    viewMyPosts.add(viewMyPostsEntity);
+                }
+                viewMyPostsResponse.setStatus(true);
+                viewMyPostsResponse.setMessage("Successfully fetched my posts");
+                viewMyPostsResponse.setPayload(viewMyPosts);
+            }
+            catch(Exception e){
+                String msg = "My posts cannot be fetched";
+                throw new ActionCannotBeCompletedException(msg);
+            }
+          }
+          else{
+              String msg = "You cant view someone else's post";
+              throw new NotAuthorizedException(msg);
+          }
+          return viewMyPostsResponse;
+      }
+      else{
+          String exceptionMessage = "You are not logged in.";
+          throw new NotLoggedInException(exceptionMessage);
+      }
+}
 
 
 

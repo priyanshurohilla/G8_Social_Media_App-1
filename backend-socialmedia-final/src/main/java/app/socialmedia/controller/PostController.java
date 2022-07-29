@@ -82,5 +82,8 @@ public class PostController {
         return new ResponseEntity<Response>(postService.ViewAllComment(postId), HttpStatus.OK);
     }
 
-
+    @GetMapping(value="/view-my-posts/{userId}", produces = "application/json")
+    public ResponseEntity<Response> viewMyPosts(@PathVariable(name = "userId") int userId){
+        return new ResponseEntity<Response>(postService.viewMyPosts(userId), HttpStatus.OK);
+    }
 }
