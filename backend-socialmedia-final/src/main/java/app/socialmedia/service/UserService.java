@@ -116,32 +116,32 @@ public class UserService {
         Response response = new Response();
         Follower follower = new Follower();
 
-        if(authService.loggedInUser.getUserId() == user.getUserId()) {
-            List<Integer> followersList = user.getFollower();
-            if(followersList.isEmpty()){
-                response.setStatus(false);
-                response.setMessage("user "+userId+" have no followers");
-            } else {
-                for (int followerId : followersList) {
-                    User follow = userRepository.findById(followerId);
-                    follower.setUserId(follow.getUserId());
-                    follower.setFullName(follow.getFullName());
-                    follower.setProfilePicUrl(follow.getProfilePicUrl());
-                    followerDetails.add(follower);
-                    response.setStatus(true);
-                    response.setMessage("Found followers list");
-                    response.setPayload(followerDetails);
-                }
-            }
+        if(user != null) {
+        List<Integer> followersList = user.getFollower();
+        if(followersList.isEmpty()){
+        response.setStatus(false);
+        response.setMessage("user "+userId+" have no followers");
+        } else {
+        for (int followerId : followersList) {
+        User follow = userRepository.findById(followerId);
+        follower.setUserId(follow.getUserId());
+        follower.setFullName(follow.getFullName());
+        follower.setProfilePicUrl(follow.getProfilePicUrl());
+        followerDetails.add(follower);
+        response.setStatus(true);
+        response.setMessage("Found followers list");
+        response.setPayload(followerDetails);
+        }
+        }
 
         }else{
-            response.setStatus(false);
-            response.setMessage("User not found");
-            response.setPayload(null);
+        response.setStatus(false);
+        response.setMessage("User not found");
+        response.setPayload(null);
         }
 
         return response;
-    }
+        }
 
     public Response removeFollower(int userId, int followerUserId){
         Response response = new Response();
