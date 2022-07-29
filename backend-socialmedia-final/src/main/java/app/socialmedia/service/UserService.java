@@ -73,7 +73,7 @@ public class UserService {
 
         boolean find = false;
         try{
-            if(user != null && follower != null){
+            if(authService.loggedInUser.getUserId() == user.getUserId()){
                 List<Integer> followersIds = user.getFollower();
                 List<Integer> followingIds = follower.getFollowing();
 
@@ -97,12 +97,9 @@ public class UserService {
                     response.setStatus(true);
                     response.setMessage("Follower added successfully");
                 }
-            }else if(user == null){
-                response.setStatus(false);
-                response.setMessage("User doesn't exist");
             }else{
                 response.setStatus(false);
-                response.setMessage("Follower doesn't exist");
+                response.setMessage("Error");
             }
             return response;
         }catch (Exception e){
@@ -119,7 +116,7 @@ public class UserService {
         Response response = new Response();
         Follower follower = new Follower();
 
-        if(user != null) {
+        if(authService.loggedInUser.getUserId() == user.getUserId()) {
             List<Integer> followersList = user.getFollower();
             if(followersList.isEmpty()){
                 response.setStatus(false);
@@ -150,20 +147,63 @@ public class UserService {
         Response response = new Response();
         User user = userRepository.findById(userId);
         User follower = userRepository.findById(followerUserId);
-            List<Integer> followersIds = user.getFollower();
-            List<Integer> followingIds = follower.getFollowing();
-            if(followersIds.contains(followerUserId) && followingIds.contains(userId)){
-                followersIds.remove(followersIds.indexOf(followerUserId));
-                followingIds.remove(followingIds.indexOf(userId));
+        try{
+            if(authService.loggedInUser.getUserId() == user.getUserId()){
+                List<Integer> followersIds = user.getFollower();
+                List<Integer> followingIds = follower.getFollowing();
+                if(followersIds.contains(followerUserId) && followingIds.contains(userId)){
+                    followersIds.remove(followersIds.indexOf(followerUserId));
+                    followingIds.remove(followingIds.indexOf(userId));
+                }
+                user.setFollower(followersIds);
+                follower.setFollowing(followingIds);
+                userRepository.save(user);
+                userRepository.save(follower);
+                response.setStatus(true);
+                response.setMessage("Follower removed");
+            }else{
+                response.setStatus(false);
+                response.setMessage("Error");
             }
-            user.setFollower(followersIds);
-            follower.setFollowing(followingIds);
-            userRepository.save(user);
-            userRepository.save(follower);
-            response.setStatus(true);
-            response.setMessage("Follower removed");
-
             return response;
+
+        }catch (Exception e){
+            response.setStatus(false);
+            response.setMessage("Follower could not be removed");
+            return response;
+        }
+
+    }
+
+    public Response unFollow(int userId, int followingUserId){
+        Response response = new Response();
+        User user = userRepository.findById(userId);
+        User following = userRepository.findById(followingUserId);
+        try{
+            if(authService.loggedInUser.getUserId() == user.getUserId()){
+                List<Integer> followingIds = user.getFollowing();
+                List<Integer> followerIds = following.getFollower();
+                if(followingIds.contains(followingUserId) && followerIds.contains(userId)){
+                    followingIds.remove(followingIds.indexOf(followingUserId));
+                    followerIds.remove(followerIds.indexOf(userId));
+                }
+                user.setFollowing(followingIds);
+                following.setFollower(followerIds);
+                userRepository.save(user);
+                userRepository.save(following);
+                response.setStatus(true);
+                response.setMessage("Unfollowed successfully");
+            }else{
+                response.setStatus(false);
+                response.setMessage("Error");
+            }
+            return response;
+
+        }catch (Exception e){
+            response.setStatus(false);
+            response.setMessage("Could not unfollow");
+            return response;
+        }
 
     }
 

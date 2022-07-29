@@ -50,6 +50,16 @@ public class UserController {
         }
     }
 
+    @PutMapping(value = "/unFollow", produces = "application/json")
+    public ResponseEntity<Response> unFollowFromList(@RequestParam int userId, @RequestParam int userIdTwo){
+        Response response = userService.unFollow(userId, userIdTwo);
+        if(response.isStatus()){
+            return new ResponseEntity<Response>(response, HttpStatus.OK);
+        }else{
+            return new ResponseEntity<Response>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping(value = "/viewFollowers", produces = "application/json")
     public ResponseEntity<Response> viewFollowerDetails(@RequestParam int userId){
             Response response = userService.viewFollower(userId);
