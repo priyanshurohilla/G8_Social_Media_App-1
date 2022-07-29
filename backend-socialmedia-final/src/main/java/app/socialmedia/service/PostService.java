@@ -44,8 +44,11 @@ public class PostService {
 
                 try {
                     int postId = mongoDbSequenceGeneratorService.getNextSequence(Post.POST_SEQUENCE_NAME);
+                    post.setCreatedByUserId(authService.loggedInUser.getUserId());
                     post.setPostId(postId);
                     post.setTimestamp(Instant.now());
+                    System.out.println(post.getImageUrl());
+                    post.setImageUrl(post.getImageUrl());
                     postRepository.save(post);
                     response.setStatus(true);
                     response.setPayload(post);
@@ -99,7 +102,6 @@ public class PostService {
     }
 
 
-
   public Response ViewAllComment(int postId)
   {   Response response = new Response();
 
@@ -130,7 +132,50 @@ public class PostService {
     }
     return  response;
   }
+public Response viewMyPosts(int userId){
+      Response viewMyPostsResponse = new Response();
+      if(authService.loggedInUser!=null){
+          List<Post> posts = postRepository.findByCreatedByUserId(userId);
+          if(posts.size()==0){
+              String msg = "No posts found";
+              throw new PostNotFoundException(msg);
+          }
 
+          List<ViewMyPostsEntity> viewMyPosts = new ArrayList<>();
+          if(authService.loggedInUser.getUserId()==userId){
+            try {
+                for (Post post : posts) {
+                    ViewMyPostsEntity viewMyPostsEntity = new ViewMyPostsEntity();
+                    viewMyPostsEntity.setPostId(post.getPostId());
+                    viewMyPostsEntity.setContent(post.getContent());
+                    viewMyPostsEntity.setNumberOfComments(post.getComments().size());
+                    viewMyPostsEntity.setNumberOfLikes(post.getLikedBy().size());
+                    viewMyPostsEntity.setUserName(authService.loggedInUser.getUserName());
+                    viewMyPostsEntity.setFullName(authService.loggedInUser.getFullName());
+                    viewMyPostsEntity.setTimestamp(post.getTimestamp());
+                    viewMyPostsEntity.setImageUrl(post.getImageUrl());
+                    viewMyPosts.add(viewMyPostsEntity);
+                }
+                viewMyPostsResponse.setStatus(true);
+                viewMyPostsResponse.setMessage("Successfully fetched my posts");
+                viewMyPostsResponse.setPayload(viewMyPosts);
+            }
+            catch(Exception e){
+                String msg = "My posts cannot be fetched";
+                throw new ActionCannotBeCompletedException(msg);
+            }
+          }
+          else{
+              String msg = "You cant view someone else's post";
+              throw new NotAuthorizedException(msg);
+          }
+          return viewMyPostsResponse;
+      }
+      else{
+          String exceptionMessage = "You are not logged in.";
+          throw new NotLoggedInException(exceptionMessage);
+      }
+}
 
 
     public Response editPost(Post post) {
@@ -283,7 +328,7 @@ public class PostService {
     public List<Post> getPosts(List<Integer> postIds) {
         List<Post> responsePosts = new ArrayList<>();
         for (int postId : postIds) {
-            Post post = postRepository.findByPostId(postId);
+            Post post = postRepository.findById(postId);
             if (post != null) {
                 responsePosts.add(post);
             }
@@ -297,7 +342,7 @@ public class PostService {
         if(authService.loggedInUser != null) {
             if (authService.loggedInUser.getUserId() == likeRequest.getUserId()) {
                 Response response = new Response();
-                Post post = postRepository.findByPostId(likeRequest.getPostId());
+                Post post = postRepository.findById(likeRequest.getPostId());
                 response = new Response();
                 if (post.getLikedBy().contains(likeRequest.getUserId())) {
                     removeLike(post, likeRequest.getUserId());
@@ -330,7 +375,7 @@ public class PostService {
         if(authService.loggedInUser != null){
             Response response = new Response();
             response = new Response();
-            Post post = postRepository.findByPostId(postId);
+            Post post = postRepository.findById(postId);
             if (post == null) {
                 response.setStatus(false);
                 response.setMessage("Post does not exist!!");
