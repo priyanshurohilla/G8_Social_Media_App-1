@@ -39,26 +39,31 @@ public class PostService {
     public Response createPost(Post post) {
         Response response = new Response();
 
-        if (authService.loggedInUser.getUserId() == post.getCreatedByUserId()) {
+        if (authService.loggedInUser != null) {
+            if (authService.loggedInUser.getUserId() == post.getCreatedByUserId()) {
 
-      try {
-        int postId = mongoDbSequenceGeneratorService.getNextSequence(Post.POST_SEQUENCE_NAME);
-        post.setPostId(postId);
-        post.setTimestamp(Instant.now());
-        postRepository.save(post);
-        response.setStatus(true);
-        response.setPayload(post);
-        response.setMessage("Created Post :" + post.getPostId());
-      } catch (Exception e) {
-        response.setStatus(false);
-        response.setMessage("Could not create post");
-      }
-      return response;
-    } else {
-      String exceptionMessage = "You are not logged in.";
-      throw new NotLoggedInException(exceptionMessage);
+                try {
+                    int postId = mongoDbSequenceGeneratorService.getNextSequence(Post.POST_SEQUENCE_NAME);
+                    post.setPostId(postId);
+                    post.setTimestamp(Instant.now());
+                    postRepository.save(post);
+                    response.setStatus(true);
+                    response.setPayload(post);
+                    response.setMessage("Created Post :" + post.getPostId());
+                } catch (Exception e) {
+                    response.setStatus(false);
+                    response.setMessage("Could not create post");
+                }
+                return response;
+            } else {
+                String exceptionMessage = "You are not authorized.";
+                throw new NotAuthorizedException(exceptionMessage);
+            }
+        } else {
+            String exceptionMessage = "You are not logged in.";
+            throw new NotLoggedInException(exceptionMessage);
+        }
     }
-  }
     public Response deletePost(int postId){
         Response deletePostResponse = new Response();
         if(authService.loggedInUser!=null){
@@ -130,6 +135,7 @@ public class PostService {
 
     public Response editPost(Post post) {
         Response response = new Response();
+        if(authService.loggedInUser != null){
         if (authService.loggedInUser.getUserId() == post.getCreatedByUserId()) {
 
             if (post.getContent().equals("") && post.getImageUrl().equals("")) {
@@ -151,53 +157,63 @@ public class PostService {
             }
             return response;
         } else {
-            String exceptionMessage = "You are not logged in.";
-            throw new NotLoggedInException(exceptionMessage);
+            String exceptionMessage = "You are not authorized.";
+            throw new NotAuthorizedException(exceptionMessage);
+        }
+    } else {
+            String message = "You are not authorized";
+            throw new NotAuthorizedException(message);
         }
     }
 
     public Response addComment(CommentRequest commentRequest) {
         Response response = new Response();
 
-        if (authService.loggedInUser.getUserId() == commentRequest.getUserId()) {
+        if(authService.loggedInUser != null) {
+            if (authService.loggedInUser.getUserId() == commentRequest.getUserId()) {
 
-            try {
+                try {
 
-                User user = userRepository.findById(commentRequest.getUserId());
-                Post post = postRepository.findById(commentRequest.getPostId());
+                    User user = userRepository.findById(commentRequest.getUserId());
+                    Post post = postRepository.findById(commentRequest.getPostId());
 
-                if (commentRequest.getContent().equals("")) {
-                    response = new Response();
+                    if (commentRequest.getContent().equals("")) {
+                        response = new Response();
+                        response.setStatus(false);
+                        response.setMessage("content should not be blank!");
+                        return response;
+                    } else {
+                        CommentEntity newComment = new CommentEntity();
+                        String commentId = UUID.randomUUID().toString();
+                        newComment.setCommentId(commentId);
+                        newComment.setPostId(post.getPostId());
+                        newComment.setUserId(commentRequest.getUserId());
+                        newComment.setFullName(user.getFullName());
+                        newComment.setProfileUrl(user.getProfilePicUrl());
+                        newComment.setContent(commentRequest.getContent());
+                        newComment.setTimeStamp(Instant.now());
+
+                        List<String> commentIdList = post.getComments();
+                        commentIdList.add(commentId);
+                        post.setComments(commentIdList);
+
+                        commentRepository.save(newComment);
+                        postRepository.save(post);
+
+                        response.setStatus(true);
+                        response.setMessage("Created comment and comment Id:" + newComment.getCommentId());
+                        response.setPayload(newComment);
+                    }
+                } catch (Exception e) {
                     response.setStatus(false);
-                    response.setMessage("content should not be blank!");
-                    return response;
-                } else {
-                    CommentEntity newComment = new CommentEntity();
-                    String commentId = UUID.randomUUID().toString();
-                    newComment.setCommentId(commentId);
-                    newComment.setPostId(post.getPostId());
-                    newComment.setUserId(commentRequest.getUserId());
-                    newComment.setFullName(user.getFullName());
-                    newComment.setProfileUrl(user.getProfilePicUrl());
-                    newComment.setContent(commentRequest.getContent());
-                    newComment.setTimeStamp(Instant.now());
-
-                    List<String> commentIdList = post.getComments();
-                    commentIdList.add(commentId);
-                    post.setComments(commentIdList);
-
-                    commentRepository.save(newComment);
-                    postRepository.save(post);
-
-                    response.setStatus(true);
-                    response.setMessage("Created comment and comment Id:" + newComment.getCommentId());
-                    response.setPayload(newComment);
+                    response.setMessage("Could not create comment, invalid user id or post Id");
                 }
-            } catch (Exception e) {
-                response.setStatus(false);
-                response.setMessage("Could not create comment, invalid user id or post Id");
+                return response;
             }
-            return response;
+        else {
+            String message = "You are not authorized";
+            throw new NotAuthorizedException(message);
+        }
         } else {
             String exceptionMessage = "You are not logged in.";
             throw new NotLoggedInException(exceptionMessage);
@@ -206,56 +222,60 @@ public class PostService {
 
 
     public Response fetchPosts(int userId) {
-        if(authService.loggedInUser.getUserId() == userId){
-            User user = userRepository.findByUserId(userId);
+        if(authService.loggedInUser != null) {
+            if (authService.loggedInUser.getUserId() == userId) {
+                User user = userRepository.findByUserId(userId);
 
-            Response response = new Response();
-            if (user == null) {
-                response.setStatus(false);
-                response.setMessage("User does not exist");
-            } else {
-                List<Integer> following = new ArrayList<>();
-                following = user.getFollowing();
-
-                if (following.isEmpty()) {
+                Response response = new Response();
+                if (user == null) {
                     response.setStatus(false);
-                    response.setMessage("user " + userId + " follows no one");
+                    response.setMessage("User does not exist");
                 } else {
-                    List<Integer> postIds = new ArrayList<>();
-                    for (int followerId : following) {
+                    List<Integer> following = new ArrayList<>();
+                    following = user.getFollowing();
 
-                        User follower = userRepository.findByUserId(followerId);
-                        if(follower == null){
-                            List<Post> posts = postRepository.findByCreatedByUserId(followerId);
-                            for(Post p: posts){
-                                postRepository.delete(p);
-                            }
-                        }
-
-                        List<Post> posts = postRepository.findByCreatedByUserId(followerId);
-
-                        if (posts != null) {
-                            for (Post p : posts) {
-                                postIds.add(p.getPostId());
-                            }
-                        } else {
-                            continue;
-                        }
-                    }
-                    if (postIds.isEmpty()) {
+                    if (following.isEmpty()) {
                         response.setStatus(false);
-                        response.setMessage("No posts to show");
+                        response.setMessage("user " + userId + " follows no one");
                     } else {
-                        response.setStatus(true);
-                        response.setMessage("Posts fetched successfully");
-                        response.setPayload(getPosts(postIds));
+                        List<Integer> postIds = new ArrayList<>();
+                        for (int followerId : following) {
+
+                            User follower = userRepository.findByUserId(followerId);
+                            if (follower == null) {
+                                List<Post> posts = postRepository.findByCreatedByUserId(followerId);
+                                for (Post p : posts) {
+                                    postRepository.delete(p);
+                                }
+                            }
+
+                            List<Post> posts = postRepository.findByCreatedByUserId(followerId);
+
+                            if (posts != null) {
+                                for (Post p : posts) {
+                                    postIds.add(p.getPostId());
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+                        if (postIds.isEmpty()) {
+                            response.setStatus(false);
+                            response.setMessage("No posts to show");
+                        } else {
+                            response.setStatus(true);
+                            response.setMessage("Posts fetched successfully");
+                            response.setPayload(getPosts(postIds));
+                        }
                     }
                 }
+                return response;
+            } else {
+                String exceptionMessage = "You are not authorized.";
+                throw new NotAuthorizedException(exceptionMessage);
             }
-            return response;
-        }
-        else {
-            String exceptionMessage = "You are not logged in.";
+        } else {
+            String exceptionMessage = "You are not authorized.";
             throw new NotLoggedInException(exceptionMessage);
         }
     }
@@ -274,25 +294,30 @@ public class PostService {
 
     public Response likePost(LikeRequest likeRequest) {
 
-        if(authService.loggedInUser.getUserId() == likeRequest.getUserId()){
-            Response response = new Response();
-            Post post = postRepository.findByPostId(likeRequest.getPostId());
-            response = new Response();
-            if (post.getLikedBy().contains(likeRequest.getUserId())) {
-                removeLike(post, likeRequest.getUserId());
+        if(authService.loggedInUser != null) {
+            if (authService.loggedInUser.getUserId() == likeRequest.getUserId()) {
+                Response response = new Response();
+                Post post = postRepository.findByPostId(likeRequest.getPostId());
+                response = new Response();
+                if (post.getLikedBy().contains(likeRequest.getUserId())) {
+                    removeLike(post, likeRequest.getUserId());
 
-                response.setStatus(true);
-                response.setMessage("Unliked Successfully");
+                    response.setStatus(true);
+                    response.setMessage("Unliked Successfully");
+                } else {
+                    post.setNumberOfLikes(post.getNumberOfLikes() + 1);
+                    List<Integer> likedBy = post.getLikedBy();
+                    likedBy.add(likeRequest.getUserId());
+                    post.setLikedBy(likedBy);
+                    postRepository.save(post);
+                    response.setStatus(true);
+                    response.setMessage("Liked Successfully");
+                }
+                return response;
             } else {
-                post.setNumberOfLikes(post.getNumberOfLikes() + 1);
-                List<Integer> likedBy = post.getLikedBy();
-                likedBy.add(likeRequest.getUserId());
-                post.setLikedBy(likedBy);
-                postRepository.save(post);
-                response.setStatus(true);
-                response.setMessage("Liked Successfully");
+                String exceptionMessage = "You are not Authorized.";
+                throw new NotAuthorizedException(exceptionMessage);
             }
-            return response;
         } else {
             String exceptionMessage = "You are not logged in.";
             throw new NotLoggedInException(exceptionMessage);
