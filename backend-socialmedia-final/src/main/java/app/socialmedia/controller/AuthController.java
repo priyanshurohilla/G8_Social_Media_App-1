@@ -49,4 +49,10 @@ public class AuthController {
       return new ResponseEntity<Response>(authService.logoutUser(userId), HttpStatus.OK);
 
   }
+  @GetMapping(value="/error")
+  public String error() {
+
+      return "Please login or sign up to continue";
+
+  }
 }
